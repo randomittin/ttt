@@ -166,8 +166,6 @@ footer p {
   box-shadow: 2px 2px 10px #888;
   background: #c44;
 }
-
-
 </style></head>
 <body>
 	<div class="container">
@@ -179,7 +177,7 @@ footer p {
 		<div class="player o">Player O: <span class="value">N/A</span></div>
 	</div>
 	<div class="info">
-		Loading.....
+		Loading...
 	</div>
 	<ul class="B">
 		<li id="00" class="block"></li>
@@ -213,21 +211,21 @@ footer p {
 </div>
 </body>
 <script type="text/javascript">
-	var B = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
-
-var X_VAL = 1;
-var O_VAL = 2;
-var EMPTY = 0;
-var TIE_VAL = -1;
-
+var B = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
 var H_P = X_VAL;
 var AI_P = O_VAL;
 var H_P_CHAR = 'X';
 var AI_P_CHAR = 'O';
 var AI_MOVE = false;
 
+var X_VAL = 1;
+var O_VAL = 2;
+var EMPTY = 0;
+var TIE_VAL = -1;
+
+
 var checkVictory = function checkVictory(B) {
-	var allNotZeros = true;
+	var allEmpty = true;
 	//check for rows
 	for (var i = 0; i < 3; i++) {
 		if (B[i][0] !== EMPTY && B[i][0] === B[i][1] && B[i][1] === B[i][2]) {
@@ -254,16 +252,37 @@ var checkVictory = function checkVictory(B) {
 	for (var k = 0; k < 3; k++) {
 		for (var l = 0; l < 3; l++) {
 			if (B[k][l] === EMPTY) {
-				allNotZeros = false;
+				allEmpty = false;
 			}
 		}
 
 	}
 
-	if (allNotZeros) return TIE_VAL;
+	if (allEmpty) return TIE_VAL;
 
 	//return no victory
 	return EMPTY;
+};
+
+var updateHtml = function updateHtml() {
+	for (var i = 0; i < 3; i++) {
+		for (var j = 0; j < 3; j++) {
+			$('#' + i + '' + j).text(B[i][j] === AI_P ? AI_P_CHAR : B[i][j] === H_P ? H_P_CHAR : '');
+			if (B[i][j] !== EMPTY) {
+				$('#' + i + '' + j).removeClass('filled').addClass('filled');
+			}
+		}
+
+	}
+
+};
+
+var aiMove = function aiMove() {
+	B = getBestMove(B, AI_P)[1];
+	AI_MOVE = false;
+	$('.content').addClass('hide');
+	$('.loading').addClass('show');
+	updateChance();
 };
 
 var getBestMove = function getBestMove(B, player) {
@@ -311,21 +330,8 @@ var getBestMove = function getBestMove(B, player) {
 	}
 };
 
-var updateView = function updateView() {
-	for (var i = 0; i < 3; i++) {
-		for (var j = 0; j < 3; j++) {
-			$('#' + i + '' + j).text(B[i][j] === AI_P ? AI_P_CHAR : B[i][j] === H_P ? H_P_CHAR : '');
-			if (B[i][j] !== EMPTY) {
-				$('#' + i + '' + j).removeClass('filled').addClass('filled');
-			}
-		}
-
-	}
-
-};
-
-var updateMove = function updateMove() {
-	updateView();
+var updateChance = function updateChance() {
+	updateHtml();
 	var rv = checkVictory(B);
 	//update info according to rv
 	$(".info").text(rv === AI_P ? "AI Won!" : rv == H_P ? "You Won!" : rv === TIE_VAL ? "Tie!" : "");
@@ -337,16 +343,8 @@ var updateMove = function updateMove() {
 	}
 };
 
-var makeAiMove = function makeAiMove() {
-	B = getBestMove(B, AI_P)[1];
-	AI_MOVE = false;
-	$('.content').addClass('hide');
-	$('.loading').addClass('show');
-	updateMove();
-};
-
 $(document).ready(function () {
-	updateMove();
+	updateChance();
 	$('.block').on('click', function (e) {
 		var block = $(this).attr('id');
 		var blockParts = block.split('');
@@ -357,9 +355,9 @@ $(document).ready(function () {
 		}
 		if (!AI_MOVE) {
 			B[x][y] = H_P;
-			updateMove();
+			updateChance();
 			AI_MOVE = true;
-			makeAiMove();
+			aiMove();
 		}
 	});
 	$('#restart').on('click', function (e) {
@@ -379,7 +377,7 @@ $(document).ready(function () {
 		$('.block').each(function () {
 			$(this).removeClass('filled').removeClass('no-click');
 		});
-		updateMove();
+		updateChance();
 	});
 	$('#x').on('click', function (e) {
 		e.preventDefault();
@@ -406,7 +404,7 @@ $(document).ready(function () {
 		$('.loading').addClass('show');
 		$('.player.x').find('.value').text('Computer');
 		$('.player.o').find('.value').text('You');
-		makeAiMove();
+		aiMove();
 		$('.player-selection').addClass('hide');
 	});
 });
