@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<head><title>Tic Tac Toe</title>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+<style type="text/css">
+	* {
+  box-sizing: border-box;
+}
+
+body {
+  width: 100%;
+  margin: 0;
+  background: #f9f9f9;
+}
+
+header h1 {
+  text-align: center;
+}
+
+footer p {
+  text-align: center;
+  font-size: 15px;
+}
+
+.players {
+  display: flex;
+  text-align: center;
+}
+.players .player {
+  margin: 0 auto;
+  justify-content: space-between;
+}
+.players .player .value {
+  font-weight: bold;
+}
+
+.info {
+  color: #888;
+  font-size: 21px;
+  text-align: center;
+  min-height: 30px;
+}
+
+.button-container {
+  text-align: center;
+  min-height: 50px;
+}
+.button-container a {
+  text-decoration: none;
+  color: #fff;
+  background-color: #c99;
+  padding: 10px 20px;
+  border-radius: 4px;
+  box-shadow: 2px 2px 5px #888;
+  pointer-events: none;
+  opacity: 0;
+  transition: all 0.25s ease-in-out;
+}
+.button-container a:hover {
+  box-shadow: 2px 2px 10px #888;
+  background-color: #c44;
+}
+.button-container a.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.B {
+  width: 210px;
+  margin: 0 auto;
+  margin-bottom: 50px;
+  display: flex;
+  flex-wrap: wrap;
+  list-style: none;
+  padding: 0;
+}
+.B .block {
+  flex-basis: calc(33.33% - 10px);
+  margin: 5px;
+  background-color: #888;
+  height: 50px;
+  box-shadow: 2px 2px 4px #888;
+  color: #fff;
+  text-align: center;
+  font-size: 32px;
+  line-height: 50px;
+  cursor: pointer;
+}
+.B .block.filled {
+  background-color: rgba(0, 0, 0, 0.7);
+  cursor: not-allowed;
+}
+.B .block.no-click {
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.B .block:hover {
+  background-color: rgba(0, 0, 0, 0.7);
+  box-shadow: 2px 2px 10px #888;
+  border:1px #aaa;
+  border-radius: 5px;
+}
+
+.player-selection {
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  background: #fff;
+  opacity: 0.97;
+}
+.player-selection.hide {
+  display: none;
+}
+.player-selection .loading {
+  text-align: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  opacity: 0;
+}
+.player-selection .loading i {
+  font-size: 32px;
+}
+.player-selection .loading.show {
+  opacity: 1;
+}
+.player-selection .content {
+  display: flex;
+  width: 100%;
+  height: 400px;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+.player-selection .content.hide {
+  opacity: 0;
+}
+.player-selection .content h1 {
+  font-size: 24px;
+}
+.player-selection .content .note {
+  margin-top: 30px;
+}
+.player-selection .content .letters {
+  display: flex;
+  margin: 0 auto;
+}
+.player-selection .content .letters a {
+  display: block;
+  width: 50px;
+  height: 50px;
+  text-align: center;
+  margin: 10px;
+  line-height: 50px;
+  text-decoration: none;
+  color: #fff;
+  font-weight: bold;
+  background: #c99;
+  transition: all 0.25s ease-in-out;
+  box-shadow: 2px 2px 5px #888;
+}
+.player-selection .content .letters a:hover {
+  box-shadow: 2px 2px 10px #888;
+  background: #c44;
+}
+
+
+</style></head>
+<body>
+	<div class="container">
+	<header>
+		<h1>Tic-Tac-Toe Game</h1>
+	</header>
+	<div class="players">
+		<div class="player x">Player X: <span class="value">N/A</span></div>
+		<div class="player o">Player O: <span class="value">N/A</span></div>
+	</div>
+	<div class="info">
+		Loading.....
+	</div>
+	<ul class="B">
+		<li id="00" class="block"></li>
+		<li id="01" class="block"></li>
+		<li id="02" class="block"></li>
+		<li id="10" class="block"></li>
+		<li id="11" class="block"></li>
+		<li id="12" class="block"></li>
+		<li id="20" class="block"></li>
+		<li id="21" class="block"></li>
+		<li id="22" class="block"></li>
+	</ul>
+	<div class="button-container">
+		<a id="restart" href="#">Restart</a>
+	</div>
+	<footer>
+		<p>Made By Rishabh Jain</p>
+	</footer>
+</div>
+
+<div class="player-selection">
+	<div class="content">
+		<h1>Please Choose Your Side</h1>
+		<div class="letters">
+			<a id='x' href="#">X</a>
+			
+			<a id='o' href="#">O</a>
+		</div>
+	<div class="loading"><i class="fa fa-spinner fa-spin"></i></div>
+</div>
+</div>
+</body>
+<script type="text/javascript">
+	var B = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+
+var X_VAL = 1;
+var O_VAL = 2;
+var EMPTY = 0;
+var TIE_VAL = -1;
+
+var H_P = X_VAL;
+var AI_P = O_VAL;
+var H_P_CHAR = 'X';
+var AI_P_CHAR = 'O';
+var AI_MOVE = false;
+
+var checkVictory = function checkVictory(B) {
+	var allNotZeros = true;
+	//check for rows
+	for (var i = 0; i < 3; i++) {
+		if (B[i][0] !== EMPTY && B[i][0] === B[i][1] && B[i][1] === B[i][2]) {
+			return B[i][0];
+		}
+	}
+
+	//check for cols
+	for (var j = 0; j < 3; j++) {
+		if (B[0][j] !== EMPTY && B[0][j] === B[1][j] && B[1][j] === B[2][j]) {
+			return B[0][j];
+		}
+	}
+
+	//check for left->bottom diagonal
+	if (B[0][0] !== EMPTY && B[0][0] === B[1][1] && B[1][1] === B[2][2]) {
+		return B[0][0];
+	}
+	//check for right->bottom diagnol
+	if (B[2][2] !== EMPTY && B[0][2] === B[1][1] && B[1][1] === B[2][0]) {
+		return B[0][2];
+	}
+	//check for tie
+	for (var k = 0; k < 3; k++) {
+		for (var l = 0; l < 3; l++) {
+			if (B[k][l] === EMPTY) {
+				allNotZeros = false;
+			}
+		}
+
+	}
+
+	if (allNotZeros) return TIE_VAL;
+
+	//return no victory
+	return EMPTY;
+};
+
+var getBestMove = function getBestMove(B, player) {
+	var rv = checkVictory(B);
+	if (rv !== EMPTY) {
+		switch (rv) {
+			case H_P:
+				return [-10, B];
+			case AI_P:
+				return [10, B];
+			case TIE_VAL:
+				return [0, B];
+		}
+	} else {
+		var nextVal = null;
+		var nextB = null;
+		for (var i = 0; i < 3; i++) {
+			for (var j = 0; j < 3; j++) {				if (B[i][j] === EMPTY) {
+					B[i][j] = player;
+					var value;
+					if (player === AI_P) {
+						value = getBestMove(B, H_P)[0];
+						if (nextVal === null || value > nextVal) {
+							nextB = B.map(function (arr) {
+								return arr.slice();
+							});
+							nextVal = value;
+						}
+					} else {
+						value = getBestMove(B, AI_P)[0];
+						if (nextVal === null || value < nextVal) {
+							nextB = B.map(function (arr) {
+								return arr.slice();
+							});
+							nextVal = value;
+						}
+					}
+					B[i][j] = EMPTY;
+				}
+			}
+
+		}
+
+		return [nextVal, nextB];
+	}
+};
+
+var updateView = function updateView() {
+	for (var i = 0; i < 3; i++) {
+		for (var j = 0; j < 3; j++) {
+			$('#' + i + '' + j).text(B[i][j] === AI_P ? AI_P_CHAR : B[i][j] === H_P ? H_P_CHAR : '');
+			if (B[i][j] !== EMPTY) {
+				$('#' + i + '' + j).removeClass('filled').addClass('filled');
+			}
+		}
+
+	}
+
+};
+
+var updateMove = function updateMove() {
+	updateView();
+	var rv = checkVictory(B);
+	//update info according to rv
+	$(".info").text(rv === AI_P ? "AI Won!" : rv == H_P ? "You Won!" : rv === TIE_VAL ? "Tie!" : "");
+	if (rv != EMPTY) {
+		$('.button-container a').addClass('show');
+		$('.block').each(function () {
+			$(this).addClass('no-click');
+		});
+	}
+};
+
+var makeAiMove = function makeAiMove() {
+	B = getBestMove(B, AI_P)[1];
+	AI_MOVE = false;
+	$('.content').addClass('hide');
+	$('.loading').addClass('show');
+	updateMove();
+};
+
+$(document).ready(function () {
+	updateMove();
+	$('.block').on('click', function (e) {
+		var block = $(this).attr('id');
+		var blockParts = block.split('');
+		var x = parseInt(blockParts[0]);
+		var y = parseInt(blockParts[1]);
+		if ($('#' + block).hasClass('filled')) {
+			return;
+		}
+		if (!AI_MOVE) {
+			B[x][y] = H_P;
+			updateMove();
+			AI_MOVE = true;
+			makeAiMove();
+		}
+	});
+	$('#restart').on('click', function (e) {
+		e.preventDefault();
+		B = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+		H_P = X_VAL;
+		AI_P = O_VAL;
+		H_P_CHAR = 'X';
+		AI_P_CHAR = 'O';
+		AI_MOVE = false;
+		$('.player-selection').removeClass('hide');
+		$('.player.x').find('.value').text('N/A');
+		$('.player.o').find('.value').text('N/A');
+		$('.content').removeClass('hide');
+		$('.loading').removeClass('show');
+		$('.button-container a').removeClass('show');
+		$('.block').each(function () {
+			$(this).removeClass('filled').removeClass('no-click');
+		});
+		updateMove();
+	});
+	$('#x').on('click', function (e) {
+		e.preventDefault();
+		console.log('clicked');
+		H_P = X_VAL;
+		AI_P = O_VAL;
+		H_P_CHAR = 'X';
+		AI_P_CHAR = 'O';
+		AI_MOVE = false;
+		$('.player-selection').addClass('hide');
+		$('.player.x').find('.value').text('You');
+		$('.player.o').find('.value').text('Computer');
+		$('.content').addClass('hide');
+		$('.loading').addClass('show');
+	});
+	$('#o').on('click', function (e) {
+		e.preventDefault();
+		H_P = O_VAL;
+		AI_P = X_VAL;
+		H_P_CHAR = 'O';
+		AI_P_CHAR = 'X';
+		AI_MOVE = true;
+		$('.content').addClass('hide');
+		$('.loading').addClass('show');
+		$('.player.x').find('.value').text('Computer');
+		$('.player.o').find('.value').text('You');
+		makeAiMove();
+		$('.player-selection').addClass('hide');
+	});
+});
+</script>
+</html>
