@@ -89,7 +89,7 @@ footer p {
   background-color: rgba(0, 0, 0, 0.7);
   cursor: not-allowed;
 }
-.B .block.no-click {
+.B .block.stop-cursor {
   cursor: not-allowed;
   pointer-events: none;
 }
@@ -100,7 +100,7 @@ footer p {
   border-radius: 5px;
 }
 
-.player-selection {
+.select-player {
   width: 100%;
   position: absolute;
   top: 0;
@@ -111,10 +111,10 @@ footer p {
   background: #fff;
   opacity: 0.97;
 }
-.player-selection.hide {
+.select-player.hide {
   display: none;
 }
-.player-selection .content {
+.select-player .content {
   display: flex;
   width: 100%;
   height: 400px;
@@ -122,20 +122,20 @@ footer p {
   align-items: center;
   flex-direction: column;
 }
-.player-selection .content.hide {
+.select-player .content.hide {
   opacity: 0;
 }
-.player-selection .content h1 {
+.select-player .content h1 {
   font-size: 24px;
 }
-.player-selection .content .note {
+.select-player .content .note {
   margin-top: 30px;
 }
-.player-selection .content .letters {
+.select-player .content .letters {
   display: flex;
   margin: 0 auto;
 }
-.player-selection .content .letters a {
+.select-player .content .letters a {
   display: block;
   width: 50px;
   height: 50px;
@@ -149,7 +149,7 @@ footer p {
   transition: all 0.25s ease-in-out;
   box-shadow: 2px 2px 5px #888;
 }
-.player-selection .content .letters a:hover {
+.select-player .content .letters a:hover {
   box-shadow: 2px 2px 10px #888;
   background: #c44;
 }
@@ -160,8 +160,8 @@ footer p {
 		<h1>Tic-Tac-Toe Game</h1>
 	</header>
 	<div class="players">
-		<div class="player o">Player O: <span class="value">NA</span></div>
 		<div class="player x">Player X: <span class="value">NA</span></div>
+		<div class="player o">Player O: <span class="value">NA</span></div>
 	</div>
 	<div class="info">
 		Loading...
@@ -185,7 +185,7 @@ footer p {
 	</footer>
 </div>
 
-<div class="player-selection">
+<div class="select-player">
 	<div class="content">
 		<h1>Please Choose Your Side</h1>
 		<div class="letters">
@@ -198,62 +198,62 @@ footer p {
 </body>
 <script type="text/javascript">
 var B = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
-var H_P = X_VAL;
-var AI_P = O_VAL;
-var H_P_CHAR = 'X';
-var AI_P_CHAR = 'O';
-var AI_MOVE = false;
+//fancy variable for updating html and score check
+var H_P = X_VAL; //human player
+var AI_P = O_VAL; //ai player
+var H_P_CHAR = 'X'; //human player character
+var AI_P_CHAR = 'O'; //ai player character
+var AI_MOVE = false; //let the player play first by default
 
-//assigning values to variables
+//assigning values to main variables; switching players with these
 var X_VAL = 1;
 var O_VAL = 2;
-var EMPTY = 0;
-var TIE_VAL = -1;
 
+//'-1' in many places represent tie situation
 
-var checkVictory = function checkVictory(B) {
-	var allEmpty = true;
+var checkWin = function checkWin(B) {
+	var all_empty = true;
 	//check for rows
 	for (var i = 0; i < 3; i++) {
-		if (B[i][0] !== EMPTY && B[i][0] === B[i][1] && B[i][1] === B[i][2]) {
+		if (B[i][0] !== 0 && B[i][0] === B[i][1] && B[i][1] === B[i][2]) {
 			return B[i][0];
 		}
 	}
 
 	//check for cols
 	for (var j = 0; j < 3; j++) {
-		if (B[0][j] !== EMPTY && B[0][j] === B[1][j] && B[1][j] === B[2][j]) {
+		if (B[0][j] !== 0 && B[0][j] === B[1][j] && B[1][j] === B[2][j]) {
 			return B[0][j];
 		}
 	}
 
-	//check for left->bottom diagonal
-	if (B[0][0] !== EMPTY && B[0][0] === B[1][1] && B[1][1] === B[2][2]) {
+	//check for left to bottom diagonal
+	if (B[0][0] !== 0 && B[0][0] === B[1][1] && B[1][1] === B[2][2]) {
 		return B[0][0];
 	}
-	//check for right->bottom diagnol
-	if (B[2][2] !== EMPTY && B[0][2] === B[1][1] && B[1][1] === B[2][0]) {
+	//check for right to bottom diagnol
+	if (B[2][2] !== 0 && B[0][2] === B[1][1] && B[1][1] === B[2][0]) {
 		return B[0][2];
 	}
 	//check for tie
 	for (var k = 0; k < 3; k++) {
 		for (var l = 0; l < 3; l++) {
-			if (B[k][l] === EMPTY) {
-				allEmpty = false;
+			if (B[k][l] === 0) {
+				all_empty = false;
 			}
 		}
 	}
-	if (allEmpty) return TIE_VAL;
+	if (all_empty) return -1;
 
-	//return if no victory
+	//return if no win
 	return 0;
 };
-
+// updating the matrix in html
 var updateHtml = function updateHtml() {
 	for (var i = 0; i < 3; i++) {
 		for (var j = 0; j < 3; j++) {
 			$('#' + i + '' + j).text(B[i][j] === AI_P ? AI_P_CHAR : B[i][j] === H_P ? H_P_CHAR : '');
-			if (B[i][j] !== EMPTY) {
+			if (B[i][j] !== 0) {
 				$('#' + i + '' + j).removeClass('filled').addClass('filled');
 			}
 		}
@@ -269,15 +269,16 @@ var aiMove = function aiMove() {
 	updateChance();
 };
 
+//Main Function
 var getBestMove = function getBestMove(B, player) {
-	var rv = checkVictory(B);
-	if (rv !== EMPTY) {
+	var rv = checkWin(B);
+	if (rv !== 0) {
 		switch (rv) {
 			case H_P:
-				return [-10, B];
+				return [-10, B]; //-10 for human
 			case AI_P:
-				return [10, B];
-			case TIE_VAL:
+				return [10, B]; // +10 for ai
+			case -1:
 				return [0, B];
 		}
 	} else {
@@ -285,7 +286,7 @@ var getBestMove = function getBestMove(B, player) {
 		var nextB = null;
 		for (var i = 0; i < 3; i++) {
 			for (var j = 0; j < 3; j++) {				
-				if (B[i][j] === EMPTY) {
+				if (B[i][j] === 0) {
 					B[i][j] = player;
 					var value;
 					if (player === AI_P) {
@@ -305,7 +306,7 @@ var getBestMove = function getBestMove(B, player) {
 							nextVal = value;
 						}
 					}
-					B[i][j] = EMPTY;
+					B[i][j] = 0;
 				}
 			}
 
@@ -315,19 +316,29 @@ var getBestMove = function getBestMove(B, player) {
 	}
 };
 
+//switching chances
 var updateChance = function updateChance() {
 	updateHtml();
-	var rv = checkVictory(B);
+	var rv = checkWin(B);
 	//update info according to rv
-	$(".info").text(rv === AI_P ? "AI Won!" : rv == H_P ? "You Won!" : rv === TIE_VAL ? "Tie!" : "");
-	if (rv != EMPTY) {
+	var t = "";
+	if (rv === AI_P){
+		t = "AI Won!";
+	}else if(rv == H_P){
+		t = "You Won!";
+	}else if(rv === -1){
+		t = "Tie!";
+	}
+	$(".info").text(t);
+	if (rv != 0) {
 		$('.button-container a').addClass('show');
 		$('.block').each(function () {
-			$(this).addClass('no-click');
+			$(this).addClass('stop-cursor'); //disabling the mouse on AI chance
 		});
 	}
 };
 
+//initialisation according to this
 $(document).ready(function () {
 	updateChance();
 	$('.block').on('click', function (e) {
@@ -356,7 +367,7 @@ $(document).ready(function () {
 		$('.player.x').find('.value').text('Computer');
 		$('.player.o').find('.value').text('You');
 		aiMove();
-		$('.player-selection').addClass('hide');
+		$('.select-player').addClass('hide');
 	});
 	$('#x').on('click', function (e) {
 		e.preventDefault();
@@ -366,7 +377,7 @@ $(document).ready(function () {
 		H_P_CHAR = 'X';
 		AI_P_CHAR = 'O';
 		AI_MOVE = false;
-		$('.player-selection').addClass('hide');
+		$('.select-player').addClass('hide');
 		$('.player.x').find('.value').text('You');
 		$('.player.o').find('.value').text('Computer');
 		$('.content').addClass('hide');
@@ -379,13 +390,13 @@ $(document).ready(function () {
 		H_P_CHAR = 'X';
 		AI_P_CHAR = 'O';
 		AI_MOVE = false;
-		$('.player-selection').removeClass('hide');
-		$('.player.x').find('.value').text('N/A');
-		$('.player.o').find('.value').text('N/A');
+		$('.select-player').removeClass('hide');
+		$('.player.x').find('.value').text('NA');
+		$('.player.o').find('.value').text('NA');
 		$('.content').removeClass('hide');
 		$('.button-container a').removeClass('show');
 		$('.block').each(function () {
-			$(this).removeClass('filled').removeClass('no-click');
+			$(this).removeClass('filled').removeClass('stop-cursor');
 		});
 		updateChance();
 	});
