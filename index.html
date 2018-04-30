@@ -160,8 +160,8 @@ footer p {
 		<h1>Tic-Tac-Toe Game</h1>
 	</header>
 	<div class="players">
-		<div class="player x">Player X: <span class="value">N/A</span></div>
-		<div class="player o">Player O: <span class="value">N/A</span></div>
+		<div class="player o">Player O: <span class="value">NA</span></div>
+		<div class="player x">Player X: <span class="value">NA</span></div>
 	</div>
 	<div class="info">
 		Loading...
@@ -204,6 +204,7 @@ var H_P_CHAR = 'X';
 var AI_P_CHAR = 'O';
 var AI_MOVE = false;
 
+//assigning values to variables
 var X_VAL = 1;
 var O_VAL = 2;
 var EMPTY = 0;
@@ -241,13 +242,11 @@ var checkVictory = function checkVictory(B) {
 				allEmpty = false;
 			}
 		}
-
 	}
-
 	if (allEmpty) return TIE_VAL;
 
-	//return no victory
-	return EMPTY;
+	//return if no victory
+	return 0;
 };
 
 var updateHtml = function updateHtml() {
@@ -346,24 +345,6 @@ $(document).ready(function () {
 			aiMove();
 		}
 	});
-	$('#restart').on('click', function (e) {
-		e.preventDefault();
-		B = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
-		H_P = X_VAL;
-		AI_P = O_VAL;
-		H_P_CHAR = 'X';
-		AI_P_CHAR = 'O';
-		AI_MOVE = false;
-		$('.player-selection').removeClass('hide');
-		$('.player.x').find('.value').text('N/A');
-		$('.player.o').find('.value').text('N/A');
-		$('.content').removeClass('hide');
-		$('.button-container a').removeClass('show');
-		$('.block').each(function () {
-			$(this).removeClass('filled').removeClass('no-click');
-		});
-		updateChance();
-	});
 	$('#o').on('click', function (e) {
 		e.preventDefault();
 		H_P = O_VAL;
@@ -389,6 +370,24 @@ $(document).ready(function () {
 		$('.player.x').find('.value').text('You');
 		$('.player.o').find('.value').text('Computer');
 		$('.content').addClass('hide');
+	});
+	$('#restart').on('click', function (e) {
+		e.preventDefault();
+		B = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+		H_P = X_VAL;
+		AI_P = O_VAL;
+		H_P_CHAR = 'X';
+		AI_P_CHAR = 'O';
+		AI_MOVE = false;
+		$('.player-selection').removeClass('hide');
+		$('.player.x').find('.value').text('N/A');
+		$('.player.o').find('.value').text('N/A');
+		$('.content').removeClass('hide');
+		$('.button-container a').removeClass('show');
+		$('.block').each(function () {
+			$(this).removeClass('filled').removeClass('no-click');
+		});
+		updateChance();
 	});
 });
 </script>
